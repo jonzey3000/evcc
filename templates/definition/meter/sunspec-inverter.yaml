@@ -3,7 +3,7 @@ products:
   - description:
       de: SunSpec Wechselrichter
       en: SunSpec Inverter
-group: generic
+    group: generic
 params:
   - name: usage
     choice: ["grid", "pv", "battery"]
@@ -14,7 +14,7 @@ params:
 render: |
   type: custom
   {{- if eq .usage "grid" }}
-  # sunspec model 20x (int+sf)/ 21x (float) meter
+  # SunSpec Model 20x/21x Meter
   power:
     source: sunspec
     {{- include "modbus" . | indent 2 }}
@@ -32,62 +32,10 @@ render: |
       - 203:TotWhImp
       - 213:TotWhImp
     scale: 0.001
-  currents:
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 201:AphA
-        - 211:AphA
-        - 203:AphA
-        - 213:AphA
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:AphB
-        - 213:AphB
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:AphC
-        - 213:AphC
-  voltages:
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 201:PhVphA
-        - 211:PhVphA
-        - 203:PhVphA
-        - 213:PhVphA
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:PhVphB
-        - 213:PhVphB
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:PhVphC
-        - 213:PhVphC
-  powers:
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 201:WphA
-        - 211:WphA
-        - 203:WphA
-        - 213:WphA
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:WphB
-        - 213:WphB
-    - source: sunspec
-      {{- include "modbus" . | indent 4 }}
-      value:
-        - 203:WphC
-        - 213:WphC
   {{- end }}
+
   {{- if eq .usage "pv" }}
+  # SunSpec Model 101 Inverter
   power:
     source: sunspec
     {{- include "modbus" . | indent 2 }}
@@ -105,8 +53,22 @@ render: |
       - 103:WH
       - 113:WH
     scale: 0.001
+  currents:
+    - source: sunspec
+      {{- include "modbus" . | indent 4 }}
+      value:
+        - 101:AphA
+        - 111:AphA
+  voltages:
+    - source: sunspec
+      {{- include "modbus" . | indent 4 }}
+      value:
+        - 101:PhVphA
+        - 111:PhVphA
   {{- end }}
+
   {{- if eq .usage "battery" }}
+  # SunSpec Battery Model
   power:
     source: sunspec
     {{- include "modbus" . | indent 2 }}
@@ -123,3 +85,38 @@ render: |
       - 802:SoC
   capacity: {{ .capacity }} # kWh
   {{- end }}
+
+  # MPPT (Model 160)
+  mppt:
+    - block: 1
+      dcv:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCV
+        scale: 0.01
+      dca:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCA
+        scale: 0.01
+      dcw:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCW
+        scale: 0.1
+    - block: 2
+      dcv:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCV
+        scale: 0.01
+      dca:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCA
+        scale: 0.01
+      dcw:
+        source: sunspec
+        {{- include "modbus" . | indent 8 }}
+        value: 160:DCW
+        scale: 0.1
